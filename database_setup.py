@@ -4,15 +4,16 @@ from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy import create_engine
- 
+from sqlalchemy.pool import SingletonThreadPool
+
 Base = declarative_base()
- 
+
 class Restaurant(Base):
     __tablename__ = 'restaurant'
-   
+
     id = Column(Integer, primary_key=True)
     name = Column(String(250), nullable=False)
- 
+
 class MenuItem(Base):
     __tablename__ = 'menu_item'
 
@@ -23,12 +24,12 @@ class MenuItem(Base):
     price = Column(String(8))
     course = Column(String(250))
     restaurant_id = Column(Integer,ForeignKey('restaurant.id'))
-    restaurant = relationship(Restaurant) 
+    restaurant = relationship(Restaurant)
 
 #We added this serialize function to be able to send JSON objects in a serializable format
     @property
     def serialize(self):
-       
+
        return {
            'name'         : self.name,
            'description'         : self.description,
@@ -36,9 +37,7 @@ class MenuItem(Base):
            'price'         : self.price,
            'course'         : self.course,
        }
- 
 
-engine = create_engine('sqlite:///restaurantmenu.db')
- 
+engine = create_engine('sqlite:///restaurantmenu.db', poolclass=SingletonThreadPool)
 
 Base.metadata.create_all(engine)
